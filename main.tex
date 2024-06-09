@@ -6,7 +6,7 @@
 %% 
 %% It may be distributed under the conditions of the LaTeX Project Public
 %% License, either version 1.2 of this license or (at your option) any
-%% later version.  The latest version of this license is in
+%% later version. The latest version of this license is in
 %%    http://www.latex-project.org/lppl.txt
 %% and version 1.2 or later is part of all distributions of LaTeX
 %% version 1999/12/01 or later.
@@ -76,7 +76,7 @@
 %%            country={}}
 %% \fntext[label3]{}
 
-\title{Aligning Our Toolkits to Our Intuitions: Local Structural Models of Cultural Networks}
+\title{Aligning Our Toolkits With Our Intuitions: Local Structural Models of Cultural Networks}
 
 %% use optional labels to link authors explicitly to addresses:
 %% \author[label1,label2]{}
@@ -150,22 +150,34 @@ The rest of the paper is organized as follows. in section~\ref{sec:networks}, I 
 \section{The Rise of Network Thinking in the Sociology of Taste}
 \label{sec:networks}
 
-\section{Relational Intuitions versus the Standard Methods}
+\section{Three Relational Intuitions versus the Standard Methods}
 \label{sec:localstruct}
 
-In this section, I revisit a series of "formalist" intuitions sociologists of taste have about core phenomena in the field and review how the usual methods would handle them. At the end of the section, I propose that probabilistic network analysis focused on local structures provides a more elegant and unified way of considering them and even pitting them against one another. 
+In this section, I revisit a series of ``formalist" intuitions sociologists of taste have about core phenomena in the field and review how the usual methods would handle them. At the end of the section, I propose that probabilistic network analysis focused on local structures provides a more elegant and unified way of considering them and providing an opportunity to even pit them against one another. 
 
 \subsection{Breadth of Taste and Popularity}
 I begin with the simplest relationist notion in the sociology of taste, which concerns the idea that people---and, by implication, groups---differ in the \textit{breadth} or \textit{extensiveness} of their tastes. In a cultural network, for the people, this would yield the notion of \textit{degree centrality}, which translated into the conceptual apparatus of the sociology of taste matches the notion of \textit{omnivorousness by volume} (OV) proposed by \citet{warde2009anatomy}---see \citet{lizardo2014omnivorousness} for further discussion. 
 
 The usual toolkit of methods can be used to analyze group differences in OV in various ways. For instance, we could specify OV as the outcome variable in a linear or count regression model. Then, we can look at coefficient estimates of various socio-demographic predictors to ascertain group differences in the number of genres or objects chosen. The usual linear regression-based methods are useful for codifying group differences in average OV but lose track of the underlying micro-structures that generate these differences at the level of local neighborhoods. These are shown in Figure~\ref{fig:local-struct1}(a). 
 
-In the figure, circles represent persons, and squares represent cultural objects. Lines are relations between people and objects. People and objects that differ according to some characteristics are shaded differently. In the figure, objects and people without shading (white filled) are ``unmarked,'' meaning we are generalizing across all their characteristics (for people socio-demographic groups on paper, for objects, any data-driven or exogenous classification into ``types''). Here, we see that the local structural intuition animating research in group differences in OV is about differences in connectivity in the cultural network among people from different groups. Some ``kinds'' of people connect to only a few objects (lighter shade of gray circle) and other kinds of people connect to many objects (darker shade of gray circle). 
+The diagram uses circles to represent individuals and squares to represent cultural objects, with lines showing the connections between people and objects. Shaded circles and squares indicate differences in characteristics. Unshaded circles and squares (those filled in white) are considered "unmarked," implying generalization across all their traits. The research on group differences in OV revolves around variations in connectivity in the cultural network among individuals from different groups. Some types of individuals are shown to connect to only a few objects (lighter shade of gray circle), while others connect to many objects (darker shade of gray circle).
 
-One advantage of the local structural specification is that we can easily switch perspectives and ask the same questions about cultural objects. Here, as shown in~\ref{fig:local-struct1}(b), differences in breadth or reach of objects translate into differences in \textit{popularity}, separating popular objects with wide audiences from niche objects with narrow audiences \citep{lizardo2018mutual}. In terms of the cultural network, these are simply differences in the (degree) centrality of objects in the other mode \citep{faust1997centrality}. These intuitions are already apparent in many standard approaches, for instance, using techniques such as factor or principal components analysis to classify cultural sets of genres or objects into ``popular'' and ``niche'' (e.g., ``highbrow'', ``folk'') clumps. 
+One advantage of using local structural specification is that it allows us to easily change perspectives and examine cultural objects in the same way. As depicted in Figure~\ref{fig:local-struct1}(b), variations in the breadth or audience reach of objects result in differences in their \textit{popularity}, distinguishing popular objects with wide audiences from niche objects with smaller audiences \citep{lizardo2018mutual}. From the viewpoint of the cultural network, these differences simply represent variations in the objects' centrality in the other mode \citep{faust1997centrality}. These ideas are already evident in many standard approaches, such as using techniques like factor or principal components analysis to categorize cultural sets of genres or objects into ``pop" and "niche" clusters (e.g., ``highbrow," ``folk").
 
-Incorporating factors related to differences between kinds of objects in terms of their audience reach into our usual models is less straightforward. We can creatively---as done by \citet{puetz2021taste}---incorporate information about differences in the popularity of objects to look at differences in consumption style between persons and incorporate those as outcome variables in a linear regression. Nevertheless, the \textit{simultaneous} consideration of differences between people and objects in the same modeling framework is out of the reach of traditional strategies. We will see they can easily be handled in the proposed framework.
+It is challenging to incorporate factors related to differences in the audience reach of various types of objects into our standard models. In a recent study, \citet{puetz2021taste} creatively combined information about differences in the popularity of objects chosen by people with differences in consumption style among individuals, using these as outcome variables in linear regression. This meant shifting the focus of analysis from objects to people, as linear regression typically deals with one unit of analysis at a time. However, the \textit{simultaneous} consideration of differences in breadth and popularity between people and objects within the same modeling framework, as required by our formalist intuitions, cannot be accommodated by traditional strategies. As we will see, these considerations can be easily dealt with in the proposed local structural framework.
 
+\subsection{Correlated choices for people and objects}
+The need for a more flexible framework becomes evident once we consider local relational intuitions of greater complexity than those related to breadth and popularity. Consider the standard---sometimes explicit but usually implicit---justification for clumping people and cultural objects into ``kinds'' in the first place (e.g., sociodemographic groups on paper or genre clusters). 
+
+I propose that the local-structural relational intuition that such clustering is grounded on is as presented in Figure~\ref{fig:local-struct2}(a) and (b). The basic justification for using data-reduction techniques, such as cluster or factor analysis, to clump cultural objects is that we presume that there is a local structural affinity between the objects under the clump, such that they tend to be chosen together by the same people. For instance, ``highbrow'' musical genres like Opera, Jazz, and Classical will tend to be chosen together, as are ``Folk'' genres like Country and Bluegrass. In terms of local structural configurations, this implies a substantive restriction in the types of ``two-paths'' we will tend to observe in the cultural networks, such that two paths featuring two objects in the same broad category joined by a person who chooses them both will be more likely to be observed than two-paths were the objects belong to different genre clusters, as shown in Figure~\ref{fig:local-struct2}(a).\footnote{In a cultural (two-mode) network, a ``two-path'' is any contiguous sequence of three nodes (a, B, c) and two edges (a---B and B---c), with two of the nodes (in this case, a and c) necessarily belonging to one mode and the other (in this case B) to the other mode, as links can only happen between nodes in different modes. In a cultural network, two paths can result from any person (B) choosing any two objects (a, c) or any two people (a, c) choosing the same object (B).} 
+
+Dually, although not usually expressed in these terms, socio-demographic similarities between people imply, at the local structural level, commonality in cultural choices. This is, in fact, the local structural consideration given for why we should observe cultural objects occupying distinct ``niches'' in sociodemographic space---provided that patterns of association between people are socially structured such that similar people are more likely to be connected \citep{mark2003culture, dellaposta2015liberals}. This is the local structural pattern shown in Figure~\ref{fig:local-struct2}(b).
+
+Traditional methods can no doubt be mobilized to explore these possibilities, especially those concerned with sociodemographic effects on common cultural choices. For instance, given a battery of cultural items, we can compute regression models with these items as outcomes and check to see which coefficient estimates show up with the same direction and patterns of statistical significance across models, indicating that people in those groups tend to choose (or abstain from) those items. In the same way, we could use standard geometric data analysis (GDA) techniques for multivariate data \citep{le2004geometric}, like Multiple Correspondence Analysis (MCA), to construct a ``social space'' composed of the different cultural items with proximities indicating the likelihood of being chosen together and then ``project'' socio-demographic categories into the space---by computing the average values of the various socio-demographic modalities across the relevant axes---to see which groups are doing the common choosing \citep{flemmen2018social, le2008class}.\footnote{This can also be done the other way around, constructing a social space of active demographic variables and projecting choices into the space; the result is the same intuition: People belonging to the same groups on paper make common cultural choices.} 
+
+The GDA approach is definitely much less awkward and more direct than the endless series of regression models approach and, thus, closer to the relational intuitions- not a surprise, given the relational bona fides of GDA. Yet, GDA remains a \textit{global} relational strategy, forcing the analyst, in the end, to rely on average approximations of the relevant local structural patterns rather than modeling those directly. 
+
+\subsection{Social closure in cultural choices}
 
 \section{Data}
 \label{sec:data}
@@ -211,13 +223,16 @@ Incorporating factors related to differences between kinds of objects in terms o
     \caption{Local structural neighborhoods of omnivorousness and popularity}
     \label{fig:local-struct1}
 \end{figure}
+
 \newpage
+
 \begin{figure}
     \centering
     \includegraphics[width=0.8\linewidth]{Figs/local-struct2.png}
     \caption{Local structural neighborhoods of correlated choices}
     \label{fig:local-struct2}
 \end{figure}
+
 \end{document}
 
 \endinput
