@@ -139,27 +139,42 @@ Cultural Networks \sep Local Structure \sep Neighborhoods \sep Exponential Rando
 \label{sec:intro}
 Recent years have seen a resurgence of work in cultural sociology that incorporates substantive and methodological ideas from network analysis to address core issues in studying taste, cultural consumption, and the structure and dynamics of ``cultural networks" more generally.
 
-Despite this efflorescence of work---and perhaps very much because of it---we stand at a curious impasse in studying taste and cultural consumption. The problem is this: While the core intuitions of the field are becoming increasingly ``formalist'' and ``relationalist,''\footnote{See \citep{erikson2013formalist} for the distinction between formalist and relationism in social network analysis. The distinction is undoubtedly important but not crucial for my broad argument. Therefore, in what follows, I will use ``formalist,'' ``formalism'', ``relational,'' and ``relationalist'' interchangeably to refer to the cluster of intuitions that come packaged with network analytic thinking and which have been increasingly used to understand cultural tastes} the core workhorse methods in the field, such as traditional regression analysis (and its various non-linear and mixed effects variations), latent class analysis, various data reduction techniques like factor and cluster analysis, and the now widely used geometric data analytic techniques only cash in those formalist intuitions in either very indirect or roundabout ways. 
+Despite this efflorescence of work---and perhaps very much because of it---we stand at a curious impasse in studying taste and cultural consumption. The problem is this: While the core intuitions of the field are becoming increasingly ``formalist'' and ``relationalist,''\footnote{See \citet{erikson2013formalist} for the distinction between formalist and relationism in social network analysis. The distinction is undoubtedly important but not crucial for my broad argument. Therefore, in what follows, I will use ``formalist,'' ``formalism'', ``relational,'' and ``relationalist'' interchangeably to refer to the cluster of intuitions that come packaged with network analytic thinking and which have been increasingly used to understand cultural tastes and cultural networks.} the core workhorse methods in the field, such as traditional regression analysis (and its various non-linear and mixed effects variations), latent class analysis, various data reduction techniques like factor and cluster analysis, and the now widely used geometric data analytic techniques only cash in those formalist intuitions in either very indirect or roundabout ways. 
 
-Meanwhile, the suite of network-inspired techniques that have been recently introduced, while useful for recasting core notions in a more relational mold, lack the natural unity and compatibility with thinking of the world as governed by chance, uncertainty, and probability as statistically grounded techniques like the general linear model or latent class analysis. 
+Meanwhile, the recently introduced suite of network-inspired techniques, while useful for recasting core notions in a more relational mold, lacks the natural unity and compatibility with thinking of the world as governed by chance, uncertainty, and probability as statistically grounded techniques like the general linear model or latent class analysis. 
 
 In this paper, I argue that a general, statistically and probabilistically grounded approach to thinking about how the local structuration of network ties gives rise to macro-structural patterns tied to a now relatively accessible, well-developed and mature framework for the statistical analysis of network structures---typically going by the offputting and unwieldy name of ``exponential random graph models,'' can serve to align the increasingly formalist intuitions quantitatively inspired cultural analysis bring to the study of tastes and culture consumption, with a coherent methodological approach that cashes in those intuitions \textit{directly}, while at the same time incorporating into a schema that is familiar to those whose go-to is the typical regression model. 
 
+The rest of the paper is organized as follows. in section~\ref{sec:networks}, I briefly review recent formalist work incorporating network ideas into the sociology of taste, concentrating on its conceptual and measurement accomplishments but also its limitations. In section~\ref{sec:localstruct}, I outline the \textit{intuition/method gap} separating our increasingly formalist ideas about how cultural networks work from the traditional analytic toolkit. In section~\ref{sec:data}, I introduce the data to be analyzed---a standard survey of the musical tastes of a representative sample of Americans---and in~\ref{sec:ermgs}, I provide a brief introduction to the local structural framework of exponential random graph models for two-mode networks \citep{pattison2002neighborhood}, which promises to close the aforementioned intuition/method gap by providing estimates and insight into all the local structural intuitions in a single mode. In section~\ref{sec:disc}, I close by outlining the implications of the results and the larger argument for future work in the sociology of taste. 
+
 \section{The Rise of Network Thinking in the Sociology of Taste}
+\label{sec:networks}
+
 \section{Relational Intuitions versus the Standard Methods}
+\label{sec:localstruct}
+
 In this section, I revisit a series of "formalist" intuitions sociologists of taste have about core phenomena in the field and review how the usual methods would handle them. At the end of the section, I propose that probabilistic network analysis focused on local structures provides a more elegant and unified way of considering them and even pitting them against one another. 
 
-\subsection{Breadth of Taste}
+\subsection{Breadth of Taste and Popularity}
 I begin with the simplest relationist notion in the sociology of taste, which concerns the idea that people---and, by implication, groups---differ in the \textit{breadth} or \textit{extensiveness} of their tastes. In a cultural network, for the people, this would yield the notion of \textit{degree centrality}, which translated into the conceptual apparatus of the sociology of taste matches the notion of \textit{omnivorousness by volume} (OV) proposed by \citet{warde2009anatomy}---see \citet{lizardo2014omnivorousness} for further discussion. 
 
 The usual toolkit of methods can be used to analyze group differences in OV in various ways. For instance, we could specify OV as the outcome variable in a linear or count regression model. Then, we can look at coefficient estimates of various socio-demographic predictors to ascertain group differences in the number of genres or objects chosen. The usual linear regression-based methods are useful for codifying group differences in average OV but lose track of the underlying micro-structures that generate these differences at the level of local neighborhoods. These are shown in Figure~\ref{fig:local-struct1}(a). 
 
-In the figure, circles represent persons, and squares represent cultural objects. Lines are relations between people and objects. People and objects that differ according to some characteristics are shaded differently. Here, we see that the local structural intuition animating research in group differences in OV is about differences in connectivity in the cultural network among people from different groups. 
+In the figure, circles represent persons, and squares represent cultural objects. Lines are relations between people and objects. People and objects that differ according to some characteristics are shaded differently. In the figure, objects and people without shading (white filled) are ``unmarked,'' meaning we are generalizing across all their characteristics (for people socio-demographic groups on paper, for objects, any data-driven or exogenous classification into ``types''). Here, we see that the local structural intuition animating research in group differences in OV is about differences in connectivity in the cultural network among people from different groups. Some ``kinds'' of people connect to only a few objects (lighter shade of gray circle) and other kinds of people connect to many objects (darker shade of gray circle). 
 
-One advantage of the local structural specification is that we can easily switch perspectives and ask the same questions about cultural objects. Here, as shown in~\ref{fig:local-struct1}(b), differences in breadth or reach of objects translate into differences in popularity, separating popular objects with wide audiences from niche objects with narrow audiences \citep{lizardo2018mutual}. In terms of the cultural network, these are simply differences in the (degree) centrality of objects in the other mode. These intuitions are already apparent in many standard approaches, for instance, using techniques such as factor analysis or principal components analysis to classify cultural objects into ``popular'' and ``niche'' clumps. 
+One advantage of the local structural specification is that we can easily switch perspectives and ask the same questions about cultural objects. Here, as shown in~\ref{fig:local-struct1}(b), differences in breadth or reach of objects translate into differences in \textit{popularity}, separating popular objects with wide audiences from niche objects with narrow audiences \citep{lizardo2018mutual}. In terms of the cultural network, these are simply differences in the (degree) centrality of objects in the other mode \citep{faust1997centrality}. These intuitions are already apparent in many standard approaches, for instance, using techniques such as factor or principal components analysis to classify cultural sets of genres or objects into ``popular'' and ``niche'' (e.g., ``highbrow'', ``folk'') clumps. 
 
-Incorporating factors related to differences between kinds of objects in terms of their audience reach into our usual models is less straightforward. We can creatively---as done by \citet{puetz2021taste}---incorporate information about differences in the popularity of objects to look at differences in consumption style between persons and incorporate those as outcome variables in a linear regression. Nevertheless, the \textit{simultaneous} consideration of differences between people and objects in the same modeling framework is out of the reach of traditional strategies. 
+Incorporating factors related to differences between kinds of objects in terms of their audience reach into our usual models is less straightforward. We can creatively---as done by \citet{puetz2021taste}---incorporate information about differences in the popularity of objects to look at differences in consumption style between persons and incorporate those as outcome variables in a linear regression. Nevertheless, the \textit{simultaneous} consideration of differences between people and objects in the same modeling framework is out of the reach of traditional strategies. We will see they can easily be handled in the proposed framework.
 
+
+\section{Data}
+\label{sec:data}
+\section{Exponential Random Graph Models for Two-Mode Networks}
+\label{sec:ermgs}
+\section{Results}
+\label{sec:results}
+\section{Discussion and Conclusion}
+\label{sec:disc}
 
 
 %% For citations use: 
@@ -174,6 +189,7 @@ Incorporating factors related to differences between kinds of objects in terms o
 %% If you have bibdatabase file and want bibtex to generate the
 %% bibitems, please use
 %%
+\newpage
 \bibliographystyle{elsarticle-harv} 
 \bibliography{refs}
 
@@ -191,9 +207,16 @@ Incorporating factors related to differences between kinds of objects in terms o
 
 \begin{figure}
     \centering
-    \includegraphics[width=1.0\linewidth]{Figs/local-struct1.png}
-    \caption{Local structural neighborhoods of omnivorousness and populairty}
+    \includegraphics[width=0.8\linewidth]{Figs/local-struct1.png}
+    \caption{Local structural neighborhoods of omnivorousness and popularity}
     \label{fig:local-struct1}
+\end{figure}
+\newpage
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\linewidth]{Figs/local-struct2.png}
+    \caption{Local structural neighborhoods of correlated choices}
+    \label{fig:local-struct2}
 \end{figure}
 \end{document}
 
