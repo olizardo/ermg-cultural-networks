@@ -12,6 +12,7 @@
    library(here)   
    library(haven)
    library(dplyr)
+   library(sjPlot)
 ```
 
 # Data Wrangling
@@ -53,8 +54,8 @@
    source(here("Functions", "demog.dat.R"))
    dat.demog <- demog.dat() %>% 
       dplyr::filter(id %in% unlist(taste.dat$id))  %>% 
-      dplyr::select(c("id", "age")) %>% 
-      mutate(across(age, as.character)) %>% 
+      dplyr::select(c("id", "age", "educ.f", "gender")) %>% 
+      mutate(across(age:gender, as.character)) %>% 
       dplyr::slice(-which(is.na(age))) %>% 
       mutate(type = NA)
    taste.mat <- as.matrix(dplyr::filter(taste.dat, id %in% dat.demog$id)[2:21])
@@ -64,6 +65,8 @@
    genre.dat <- data.frame(matrix(nrow = 20, ncol = 0))
    rownames(genre.dat) <- names(taste.dat[,2:21])
    genre.dat$age <- NA
+   genre.dat$educ.f <- NA
+   genre.dat$gender <- NA
    genre.dat$type <- c(rep("high", 6), rep("folk", 5), rep("blkpop", 4), rep("pop", 5))
    genre.dat
    dat.demog <- rbind(dat.demog, genre.dat)
@@ -76,14 +79,22 @@
 
 
 ```{r}
-   mod1 <- ergm(taste.net ~ edges)
-   summary(mod1)
-   mod2 <- ergm(taste.net ~ edges + 
-                   b1factor("age", levels = -6))
-   summary(mod2)
-
-   mod3 <- ergm(taste.net ~ edges + 
-                   b1factor("age", levels = -6))
-   summary(mod3)
+   m1 <- ergm(taste.net ~ edges)
+   m2 <- ergm(taste.net ~ edges + 
+                 b2factor("type", levels = -4))
+   m3 <- ergm(taste.net ~ edges + 
+                 b2factor("type", levels = -4) + 
+                 b1factor("educ.f", levels = c(4, 2, 7, 3, 6, 5)) +
+                 b1factor("age", levels = -4) +
+                 b1factor("gender") 
+                 )
+   m4 <- ergm(taste.net ~ edges + 
+                 b2factor("type", levels = -4) + 
+                 b1factor("educ.f", levels = c(4, 2, 7, 3, 6, 5)) +
+                 b1factor("age", levels = -4) +
+                 b1factor("gender") +
+                 b2nodematch("type", beta = .25)
+                 )
+   summary(m4)
 ```
 
