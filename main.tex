@@ -152,9 +152,13 @@ In this section, I revisit a series of "formalist" intuitions sociologists of ta
 \subsection{Breadth of Taste}
 I begin with the simplest relationist notion in the sociology of taste, which concerns the idea that people---and, by implication, groups---differ in the \textit{breadth} or \textit{extensiveness} of their tastes. In a cultural network, for the people, this would yield the notion of \textit{degree centrality}, which translated into the conceptual apparatus of the sociology of taste matches the notion of \textit{omnivorousness by volume} (OV) proposed by \citet{warde2009anatomy}---see \citet{lizardo2014omnivorousness} for further discussion. 
 
-The usual toolkit of methods can be used to analyze group differences in OV in various ways. For instance, we could specify OV as the outcome variable in a linear or count regression model. Then, we can look at coefficient estimates of various socio-demographic predictors to ascertain group differences in the number of genres or objects chosen. The usual linear regression-based methods are useful for codifying group differences in average OV but lose track of the underlying micro-structures that generate these differences at the level of local neighborhoods. These are shown in Figure~\ref{fig:local-struct}(a). 
+The usual toolkit of methods can be used to analyze group differences in OV in various ways. For instance, we could specify OV as the outcome variable in a linear or count regression model. Then, we can look at coefficient estimates of various socio-demographic predictors to ascertain group differences in the number of genres or objects chosen. The usual linear regression-based methods are useful for codifying group differences in average OV but lose track of the underlying micro-structures that generate these differences at the level of local neighborhoods. These are shown in Figure~\ref{fig:local-struct1}(a). 
 
 In the figure, circles represent persons, and squares represent cultural objects. Lines are relations between people and objects. People and objects that differ according to some characteristics are shaded differently. Here, we see that the local structural intuition animating research in group differences in OV is about differences in connectivity in the cultural network among people from different groups. 
+
+One advantage of the local structural specification is that we can easily switch perspectives and ask the same questions about cultural objects. Here, as shown in~\ref{fig:local-struct1}(b), differences in breadth or reach of objects translate into differences in popularity, separating popular objects with wide audiences from niche objects with narrow audiences \citep{lizardo2018mutual}. In terms of the cultural network, these are simply differences in the (degree) centrality of objects in the other mode. These intuitions are already apparent in many standard approaches, for instance, using techniques such as factor analysis or principal components analysis to classify cultural objects into ``popular'' and ``niche'' clumps. 
+
+Incorporating factors related to differences between kinds of objects in terms of their audience reach into our usual models is less straightforward. We can creatively---as done by \citet{puetz2021taste}---incorporate information about differences in the popularity of objects to look at differences in consumption style between persons and incorporate those as outcome variables in a linear regression. Nevertheless, the \textit{simultaneous} consideration of differences between people and objects in the same modeling framework is out of the reach of traditional strategies. 
 
 
 
@@ -185,7 +189,12 @@ In the figure, circles represent persons, and squares represent cultural objects
 
 % \end{thebibliography}
 
-
+\begin{figure}
+    \centering
+    \includegraphics[width=1.0\linewidth]{Figs/local-struct1.png}
+    \caption{Local structural neighborhoods of omnivorousness and populairty}
+    \label{fig:local-struct1}
+\end{figure}
 \end{document}
 
 \endinput
