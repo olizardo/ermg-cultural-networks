@@ -51,50 +51,68 @@
 ```
 
 ```{r}
+   # demog data
    source(here("Functions", "demog.dat.R"))
    dat.demog <- demog.dat() %>% 
       dplyr::filter(id %in% unlist(taste.dat$id))  %>% 
-      dplyr::select(c("id", "age", "educ.f", "gender")) %>% 
-      mutate(across(age:gender, as.character)) %>% 
+      dplyr::select(c("id", "age", "educ.f", "gender", "race")) %>% 
+      mutate(across(age:race, as.character)) %>% 
       dplyr::slice(-which(is.na(age))) %>% 
-      mutate(type = NA)
+      mutate(age.n = as.numeric(age), type = NA)  
    taste.mat <- as.matrix(dplyr::filter(taste.dat, id %in% dat.demog$id)[2:21])
    rownames(taste.mat) <- dat.demog$id
    dat.demog <- dat.demog[-1]
-   #genre data
+   # genre data
    genre.dat <- data.frame(matrix(nrow = 20, ncol = 0))
    rownames(genre.dat) <- names(taste.dat[,2:21])
    genre.dat$age <- NA
    genre.dat$educ.f <- NA
    genre.dat$gender <- NA
+   genre.dat$race <- NA
+   genre.dat$age.n <- NA
    genre.dat$type <- c(rep("high", 6), rep("folk", 5), rep("blkpop", 4), rep("pop", 5))
    genre.dat
    dat.demog <- rbind(dat.demog, genre.dat)
    attribute_list <- do.call(list, dat.demog)
-   #network object
+   # network object
    taste.net <- network(taste.mat, bipartite = TRUE, vertex.attr = attribute_list)
 ```
    
 
+```{r}
+   summary(
+      ergm(taste.net ~ edges +
+              #gwb1degree(decay = 0.5, fixed = TRUE) +
+              #b2sociality(nodes = -7) + 
+              #b1cov("age") + 
+              b1nodematch("age", diff = TRUE, beta = 0.5) +
+              b1nodematch("race", diff = TRUE, beta = 0.5, levels = -5) +
+              b1nodematch("educ.f", diff = TRUE,  
+                          levels = c(1, 4, 2, 6, 3, 5), beta = 0.5) 
+           , estimate = "MPLE"
+           )
+      )
+```
 
 
 ```{r}
-   m1 <- ergm(taste.net ~ edges)
-   m2 <- ergm(taste.net ~ edges + 
-                 b2factor("type", levels = -4))
+   m1 <- ergm(taste.net ~ edges, estimate = "MPLE")
+   m2 <- ergm(taste.net ~ edges + b2sociality(nodes = -7), estimate = "MPLE")
    m3 <- ergm(taste.net ~ edges + 
-                 b2factor("type", levels = -4) + 
-                 b1factor("educ.f", levels = c(4, 2, 7, 3, 6, 5)) +
-                 b1factor("age", levels = -4) +
-                 b1factor("gender") 
-                 )
-   m4 <- ergm(taste.net ~ edges + 
-                 b2factor("type", levels = -4) + 
-                 b1factor("educ.f", levels = c(4, 2, 7, 3, 6, 5)) +
-                 b1factor("age", levels = -4) +
+                 b2sociality(nodes = -7) +
+                 b1factor("educ.f", levels = c(4, 2, 6, 3, 5)) +
+                 b1cov("age") +
                  b1factor("gender") +
-                 b2nodematch("type", beta = .25)
-                 )
+                 b1factor("race", levels = -6), 
+              estimate = "MPLE")
+   m4 <- ergm(taste.net ~ edges + 
+                    b2sociality(nodes = -7) +
+                    b1factor("educ.f", levels = c(4, 2, 6, 3, 5)) +
+                    b1cov("age") +
+                    b1factor("gender") +
+                    #b1factor("race", levels = -6) +
+                    b1twostar("race", b1levels = 2), 
+                 estimate = "MPLE")
    summary(m4)
 ```
 

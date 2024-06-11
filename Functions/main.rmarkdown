@@ -1,0 +1,120 @@
+---
+    title: "From Local Structure to Cultural Networks"
+    author: "Omar Lizardo"
+    date: "`r Sys.Date()`"
+---
+
+
+# Setup
+
+```{r setup}
+   knitr::opts_chunk$set(include=FALSE, echo = TRUE, warning = FALSE, message = FALSE)
+   library(conflicted)
+   library(ergm)
+   library(here)   
+   library(haven)
+   library(dplyr)
+   library(sjPlot)
+```
+
+
+# Data Wrangling
+
+```{r Importing and creating two mode data frame of people by genres}
+    taste.dat <- read_dta("C:/Users/Omar Lizardo/Google Drive/MISC DATA SOURCES/SSI-2012/SSI2012.dta")
+    taste.dat <- taste.dat %>% 
+      dplyr::select("id", ends_with(c("lis", "like")), -starts_with("none")) %>% 
+      dplyr::select(c(1:41)) %>% 
+      na.omit() %>% 
+      mutate(Classical = classicallike * classicallis,
+             Opera = operalike * operalis,
+             Jazz = jazzlike * jazzlis,
+             Broadway = bwaystlike * bwaystlis,
+             Easy = moodezlike * moodezlis, 
+             Bigband = bbandlike * bbandlis,
+             Classic_Rock = croldlike * croldlis,
+             Country = countrylike * countrylis,
+             Bluegrass = blueglike * blueglis,
+             Folk = folklike * folklis,
+             Gospel = hymgoslike * hymgoslis,
+             Salsa = latlpsallike * latspsallis,
+             Rap_Hip_Hop = raphiphoplike * raphiphoplis,
+             Blues_RandB = blurblike * blurblis,
+             Reggae = reggaelike * reggaelis,
+             Pop = toppoplike * toppoplis,
+             Contemp_Rock = controcklike * controcklis,
+             Indie_Alt = indaltlike * indaltlis,
+             Dance_Club = danclublike * danclublis,
+             Metal = hvymtllike * hvymtllis
+             ) %>%  #people are linked to genres that the both like and listen to
+      dplyr::select(id, Classical:Metal) %>% 
+      rowwise() %>% 
+      mutate(deg = sum(c_across(2:21))) %>% 
+      ungroup() %>% 
+      dplyr::filter(deg > 0 & deg < 20) 
+```
+
+```{r}
+   # demog data
+   source(here("Functions", "demog.dat.R"))
+   dat.demog <- demog.dat() %>% 
+      dplyr::filter(id %in% unlist(taste.dat$id))  %>% 
+      dplyr::select(c("id", "age", "educ.f", "gender", "race")) %>% 
+      mutate(across(age:race, as.character)) %>% 
+      dplyr::slice(-which(is.na(age))) %>% 
+      mutate(age.n = as.numeric(age), type = NA)  
+   taste.mat <- as.matrix(dplyr::filter(taste.dat, id %in% dat.demog$id)[2:21])
+   rownames(taste.mat) <- dat.demog$id
+   dat.demog <- dat.demog[-1]
+   # genre data
+   genre.dat <- data.frame(matrix(nrow = 20, ncol = 0))
+   rownames(genre.dat) <- names(taste.dat[,2:21])
+   genre.dat$age <- NA
+   genre.dat$educ.f <- NA
+   genre.dat$gender <- NA
+   genre.dat$race <- NA
+   genre.dat$age.n <- NA
+   genre.dat$type <- c(rep("high", 6), rep("folk", 5), rep("blkpop", 4), rep("pop", 5))
+   genre.dat
+   dat.demog <- rbind(dat.demog, genre.dat)
+   attribute_list <- do.call(list, dat.demog)
+   # network object
+   taste.net <- network(taste.mat, bipartite = TRUE, vertex.attr = attribute_list)
+```
+
+```{r}
+   summary(
+      ergm(taste.net ~ edges +
+              #gwb1degree(decay = 0.5, fixed = TRUE) +
+              #b2sociality(nodes = -7) + 
+              #b1cov("age") + 
+              b1nodematch("age", diff = TRUE, beta = 0.5) +
+              b1nodematch("race", diff = TRUE, beta = 0.5, levels = -5) +
+              b1nodematch("educ.f", diff = TRUE,  
+                          levels = c(1, 4, 2, 6, 3, 5), beta = 0.5) 
+           , estimate = "MPLE"
+           )
+      )
+```
+
+```{r}
+   m1 <- ergm(taste.net ~ edges, estimate = "MPLE")
+   m2 <- ergm(taste.net ~ edges + b2sociality(nodes = -7), estimate = "MPLE")
+   m3 <- ergm(taste.net ~ edges + 
+                 b2sociality(nodes = -7) +
+                 b1factor("educ.f", levels = c(4, 2, 6, 3, 5)) +
+                 b1cov("age") +
+                 b1factor("gender") +
+                 b1factor("race", levels = -6), 
+              estimate = "MPLE")
+   m4 <- ergm(taste.net ~ edges + 
+                    b2sociality(nodes = -7) +
+                    b1factor("educ.f", levels = c(4, 2, 6, 3, 5)) +
+                    b1cov("age") +
+                    b1factor("gender") +
+                    #b1factor("race", levels = -6) +
+                    b1twostar("race", b1levels = 2), 
+                 estimate = "MPLE")
+   summary(m4)
+```
+
