@@ -13,6 +13,7 @@
    library(haven)
    library(dplyr)
    library(sjPlot)
+   library(tidyr)
 ```
 
 # Data Wrangling
@@ -50,15 +51,94 @@
       dplyr::filter(deg > 0 & deg < 20) 
 ```
 
+```{r import data on perceived genre characteristics}
+    #importing data
+    dat <- read_dta("C:/Users/Omar Lizardo/Google Drive/MISC DATA SOURCES/SSI-2012/SSI2012.dta") %>% 
+        select(classicalfemale:hvymtluc, -ends_with("none")) %>% 
+        na.omit() 
+    vec <- round(colSums(dat)/nrow(dat),  3)
+    tab <- matrix(vec, nrow = 15, ncol = 20)
+    dems <- c("Women", "Men", "White", "Black", "Hisp.", "Asian", "College", "No Coll.", "Young", "Mid. Aged", "Old", "Lower Cls.", "Working Cls.", "Middle Cls.", "Upper Cls.")
+    genres <- c("Classical", "Opera", "Jazz", "Musicals", "Mood/Easy", "Big Band", "Classic Rock", "Country", "Bluegrass", "Folk", "Gospel", "Latin", "Rap/Hip Hop", "Blues/R&B", "Regagae", "Pop/Top 40", "Cont. Rock", "Alt. Rock", "EDM/Club", "Metal")
+    rownames(tab) <- dems
+    colnames(tab) <- genres
+    
+```
+
+```{r}
+   test.mat <- matrix(0, nrow = 15, ncol = 20)
+   k <- 1
+   i <- 1
+   while (k <= 300) {
+      for (j in 1:15) {
+         p <- prop.test(sum(dat[, k]), nrow(dat), mean(tab[j, ]), correct = FALSE, alternative = "greater")
+      test.mat[j, i] <- as.numeric(p$p.value < 0.01)
+      k <- k + 1
+      }
+   i <- i + 1
+   }
+   rownames(test.mat) <- dems
+   colnames(test.mat) <- genres
+   test.mat
+   test.dat <-  test.mat %>% 
+      data.frame() %>% 
+      pivot_longer(
+      cols = c(1:20),
+      names_to = "genre",
+      values_to = "sig"
+    )
+  per.dat <-  tab %>% 
+      data.frame() %>% 
+      pivot_longer(
+      cols = c(1:20),
+      names_to = "genre",
+      values_to = "per"
+    )
+  dem.col <- rep("Women", 20)
+  for (i in 2:15) {
+     dem.col <- c(dem.col, rep(dems[i], 20))
+  }
+  test.dat$dems <- dem.col
+  test.dat <- relocate(test.dat, sig, .after = dems)
+  test.dat$per <- round(per.dat$per, 2)*100
+  test.dat$dems <- factor(test.dat$dems, levels = dems)
+  test.dat$genre <- factor(test.dat$genre, levels = unique(test.dat$genre))
+
+```
+
+```{r}
+   library(ggplot2)
+   
+   p <- ggplot(test.dat, aes(x = dems, y = genre, fill = sig)) 
+   p <- p + geom_tile(color = "white", lwd = 1) 
+   p <- p + geom_text(aes(label = per), parse = FALSE,
+                        color = "white", size = 4) 
+   p <- p + theme(legend.position = "none")
+   p <- p + labs(x = "", y = "")
+   p <- p + scale_x_discrete(position = "top")
+   p <- p + scale_y_discrete(limits=rev)
+   p <- p + scale_fill_gradient(low = "steelblue", high = "firebrick") 
+   p <- p + theme(legend.position = "none",
+                    axis.text.x = element_text(angle = 0)) 
+   p
+```
+
+
+
 ```{r}
    # demog data
    source(here("Functions", "demog.dat.R"))
    dat.demog <- demog.dat() %>% 
       dplyr::filter(id %in% unlist(taste.dat$id))  %>% 
-      dplyr::select(c("id", "age", "educ.f", "gender", "race")) %>% 
-      mutate(across(age:race, as.character)) %>% 
-      dplyr::slice(-which(is.na(age))) %>% 
-      mutate(age.n = as.numeric(age), type = NA)  
+      dplyr::select(c("id", "age", "college", "objclass", "subclass",
+                      "gender", "race", "region.f")) %>% 
+      mutate(age.n = as.numeric(age), 
+             #educ.n = as.numeric(educ.f),
+             type = NA) %>% 
+      mutate(across(age:region.f, as.character)) %>% 
+      dplyr::slice(-which(is.na(age.n))) %>% 
+      dplyr::slice(-which(is.na(objclass))) 
+   
    taste.mat <- as.matrix(dplyr::filter(taste.dat, id %in% dat.demog$id)[2:21])
    rownames(taste.mat) <- dat.demog$id
    dat.demog <- dat.demog[-1]
@@ -66,10 +146,14 @@
    genre.dat <- data.frame(matrix(nrow = 20, ncol = 0))
    rownames(genre.dat) <- names(taste.dat[,2:21])
    genre.dat$age <- NA
-   genre.dat$educ.f <- NA
+   genre.dat$college <- NA
+   genre.dat$objclass <- NA
+   genre.dat$subclass <- NA
    genre.dat$gender <- NA
    genre.dat$race <- NA
+   genre.dat$region.f <- NA
    genre.dat$age.n <- NA
+   #genre.dat$educ.n <- NA
    genre.dat$type <- c(rep("high", 6), rep("folk", 5), rep("blkpop", 4), rep("pop", 5))
    genre.dat
    dat.demog <- rbind(dat.demog, genre.dat)
@@ -80,18 +164,34 @@
    
 
 ```{r}
-   summary(
-      ergm(taste.net ~ edges +
-              #gwb1degree(decay = 0.5, fixed = TRUE) +
-              #b2sociality(nodes = -7) + 
-              #b1cov("age") + 
-              b1nodematch("age", diff = TRUE, beta = 0.5) +
-              b1nodematch("race", diff = TRUE, beta = 0.5, levels = -5) +
-              b1nodematch("educ.f", diff = TRUE,  
-                          levels = c(1, 4, 2, 6, 3, 5), beta = 0.5) 
-           , estimate = "MPLE"
+      m <- ergm(taste.net ~
+              edges +
+              b2star(2) 
+              #b1cov("age.n") +
+              #b1factor("race", levels = -6) +
+              #b1nodematch("race", beta = .5, diff = F) +
+              #b1nodematch("age", beta = .5, diff = F) +
+              #b1nodematch("gender", beta = .5) 
+
+
+         #b1cov("age.n") +
+         #b1factor("race", levels = -2) +
+         #b1factor("educ.f", levels = c(1, 4, 2, 3, 5)) +
+         #b1nodematch("race", beta = 0.5) +
+         #b1nodematch("educ.f", beta = 0.5) 
+         #b1nodematch("educ.f", diff = TRUE,  
+                    #levels = c(1, 4, 2, 6, 3, 5), beta = 0.5) 
+         #b1nodematch("age", beta = 0.5)
+         #b1factor("objclass", levels = c(5, 1, 4, 3)) +
+         #b1nodematch("race", diff = TRUE, beta = 0.5, levels = -5) +
+         #b1nodematch("educ.f", diff = TRUE,  
+                    #levels = c(1, 4, 2, 6, 3, 5), beta = 0.5) +
+         #b1nodematch("age", diff = TRUE, beta = 0.5) +
+         #b1nodematch("objclass", diff = TRUE,
+                     #levels = c(2, 5, 1, 4, 3), beta = 0.5) 
+         , estimate = "MLE"
            )
-      )
+      summary(m)
 ```
 
 
