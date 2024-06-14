@@ -1,10 +1,24 @@
 
-\begin{table}
+\usepackage{booktabs}
+\usepackage{longtable}
+
 \begin{center}
-\begin{tabular}{l c c}
-\hline
+\begin{longtable}{l c c}
+\toprule
  & Model 1 & Model 2 \\
-\hline
+\midrule
+\endfirsthead
+\toprule
+ & Model 1 & Model 2 \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\bottomrule
+\multicolumn{3}{l}{\scriptsize{$^{***}p<0.001$; $^{**}p<0.01$; $^{*}p<0.05$}}\\
+\caption{Statistical models}
+\label{table:coefficients}
+\endlastfoot \\
 Edges                             & $-4.01^{***}$ & $-4.65^{***}$ \\
                                   & $(0.07)$      & $(0.10)$      \\
 Person 2-Star                     & $0.13^{***}$  & $-0.02$       \\
@@ -49,14 +63,9 @@ Not Old-Genre: Old 2-Star         &               & $0.06^{*}$    \\
                                   &               & $(0.02)$      \\
 Old-Genre: Old 2-Star             &               & $0.15^{***}$  \\
                                   &               & $(0.03)$      \\
-\hline
+\midrule
 AIC                               & $40541.73$    & $39163.10$    \\
 BIC                               & $40662.72$    & $39353.24$    \\
 Log Likelihood                    & $-20256.86$   & $-19559.55$   \\
-\hline
-\multicolumn{3}{l}{\scriptsize{$^{***}p<0.001$; $^{**}p<0.01$; $^{*}p<0.05$}}
-\end{tabular}
-\caption{Statistical models}
-\label{table:coefficients}
+\end{longtable}
 \end{center}
-\end{table}
