@@ -86,7 +86,7 @@ demog.dat <- function() {
              blk = if_else(raceeth == 2, 1, 0),
              his = if_else(raceeth == 3, 1, 0),
              wht = if_else(raceeth == 4, 1, 0),
-             mro = if_else(raceeth == 5 | race == 6, 1, 0),
+             mrc = if_else(raceeth == 5, 1, 0),
              wrk.c = if_else(percclass == 2, 1, 0),
              mid.c = if_else(percclass == 3, 1, 0),
              lo.inc = if_else(incmid <= 25000, 1, 0),

@@ -1,7 +1,7 @@
 ---
-    title: "From Local Structure to Cultural Networks"
-    author: "Omar Lizardo"
-    date: "`r Sys.Date()`"
+    title:"From Local Structure to Cultural Networks"
+    author:"Omar Lizardo"
+    date:"`r Sys.Date()`"
 ---
 
 # Setup
@@ -9,10 +9,13 @@
    knitr::opts_chunk$set(include=FALSE, echo = TRUE, warning = FALSE, message = FALSE)
    library(conflicted)
    library(ergm)
+   library(fergm)
+   library(ggplot2)
    library(here)   
    library(haven)
    library(dplyr)
    library(sjPlot)
+   library(texreg)
    library(tidyr)
 ```
 
@@ -20,7 +23,7 @@
 ```{r Importing and creating two mode data frame of people by genres}
     taste.dat <- read_dta("C:/Users/Omar Lizardo/Google Drive/MISC DATA SOURCES/SSI-2012/SSI2012.dta")
     taste.dat <- taste.dat %>% 
-      dplyr::select("id", ends_with(c("lis", "like")), -starts_with("none")) %>% 
+      dplyr::select("id", ends_with(c("lis","like")), -starts_with("none")) %>% 
       dplyr::select(c(1:41)) %>% 
       na.omit() %>% 
       mutate(Classical = classicallike * classicallis,
@@ -51,28 +54,28 @@
       dplyr::filter(deg > 0 & deg < 20) 
 ```
 
-```{r import data on perceived genre characteristics}
+```{r import data on perceived genre demographics}
     #importing data
     dat <- read_dta("C:/Users/Omar Lizardo/Google Drive/MISC DATA SOURCES/SSI-2012/SSI2012.dta") %>% 
         select(classicalfemale:hvymtluc, -ends_with("none")) %>% 
         na.omit() 
     vec <- round(colSums(dat)/nrow(dat),  3)
     tab <- matrix(vec, nrow = 15, ncol = 20)
-    dems <- c("Women", "Men", "White", "Black", "Hisp.", "Asian", "College", "No Coll.", "Young", "Mid. Aged", "Old", "Lower Cls.", "Working Cls.", "Middle Cls.", "Upper Cls.")
-    genres <- c("Classical", "Opera", "Jazz", "Musicals", "Mood/Easy", "Big Band", "Classic Rock", "Country", "Bluegrass", "Folk", "Gospel", "Latin", "Rap/Hip Hop", "Blues/R&B", "Regagae", "Pop/Top 40", "Cont. Rock", "Alt. Rock", "EDM/Club", "Metal")
+    dems <- c("Women","Men","White","Black","Hisp.","Asian","College","No Coll.","Young","Mid. Aged","Old","Lower Cls.","Working Cls.","Middle Cls.","Upper Cls.")
+    genres <- c("Classical","Opera","Jazz","Musicals","Mood/Easy","Big Band","Classic Rock","Country","Bluegrass","Folk","Gospel","Latin","Rap/Hip Hop","Blues/R&B","Regagae","Pop/Top 40","Cont. Rock","Alt. Rock","EDM/Club","Metal")
     rownames(tab) <- dems
     colnames(tab) <- genres
     
 ```
 
-```{r}
+```{r Wrangling tile plot data}
    test.mat <- matrix(0, nrow = 15, ncol = 20)
    k <- 1
    i <- 1
    while (k <= 300) {
       for (j in 1:15) {
-         p <- prop.test(sum(dat[, k]), nrow(dat), mean(tab[j, ]), correct = FALSE, alternative = "greater")
-      test.mat[j, i] <- as.numeric(p$p.value < 0.01)
+         p <- prop.test(sum(dat[, k]), nrow(dat), mean(tab[j, ]), correct = FALSE, alternative ="greater")
+      test.mat[j, i] <- as.numeric(p$p.value < 0.0001)
       k <- k + 1
       }
    i <- i + 1
@@ -84,20 +87,20 @@
       data.frame() %>% 
       pivot_longer(
       cols = c(1:20),
-      names_to = "genre",
-      values_to = "sig"
+      names_to ="genre",
+      values_to ="sig"
     )
   per.dat <-  tab %>% 
       data.frame() %>% 
       pivot_longer(
       cols = c(1:20),
-      names_to = "genre",
-      values_to = "per"
+      names_to ="genre",
+      values_to ="per"
     )
   dem.col <- rep("Women", 20)
   for (i in 2:15) {
      dem.col <- c(dem.col, rep(dems[i], 20))
-  }
+   }
   test.dat$dems <- dem.col
   test.dat <- relocate(test.dat, sig, .after = dems)
   test.dat$per <- round(per.dat$per, 2)*100
@@ -106,113 +109,164 @@
 
 ```
 
-```{r}
-   library(ggplot2)
-   
+```{r Tile plot of genres by perceived demographics}
    p <- ggplot(test.dat, aes(x = dems, y = genre, fill = sig)) 
-   p <- p + geom_tile(color = "white", lwd = 1) 
+   p <- p + geom_tile(color ="white", lwd = 1) 
    p <- p + geom_text(aes(label = per), parse = FALSE,
-                        color = "white", size = 4) 
-   p <- p + theme(legend.position = "none")
-   p <- p + labs(x = "", y = "")
-   p <- p + scale_x_discrete(position = "top")
+                        color ="white", size = 4.5) 
+   p <- p + theme(legend.position ="none")
+   p <- p + labs(x ="", y ="")
+   p <- p + scale_x_discrete(position ="top")
    p <- p + scale_y_discrete(limits=rev)
-   p <- p + scale_fill_gradient(low = "steelblue", high = "firebrick") 
-   p <- p + theme(legend.position = "none",
-                    axis.text.x = element_text(angle = 0)) 
-   p
+   p <- p + scale_fill_gradient(low ="steelblue", high ="firebrick") 
+   p <- p + theme(legend.position ="none",
+                    axis.text = 
+                     element_text(size = 10)) 
+    png(file = here("Plots","genre-dems.png"), width=1000, height=500)
+    p
+    dev.off()
 ```
 
 
 
 ```{r}
    # demog data
-   source(here("Functions", "demog.dat.R"))
+   source(here("Functions","demog.dat.R"))
    dat.demog <- demog.dat() %>% 
       dplyr::filter(id %in% unlist(taste.dat$id))  %>% 
-      dplyr::select(c("id", "age", "college", "objclass", "subclass",
-                      "gender", "race", "region.f")) %>% 
-      mutate(age.n = as.numeric(age), 
+      dplyr::select(c("id","college","blk","his","wht","asn","mrc", "female","yng","mid", "old")) %>%
+      mutate(female = as.numeric(female)) %>% 
+      #mutate(age.n = as.numeric(age), 
              #educ.n = as.numeric(educ.f),
-             type = NA) %>% 
-      mutate(across(age:region.f, as.character)) %>% 
-      dplyr::slice(-which(is.na(age.n))) %>% 
-      dplyr::slice(-which(is.na(objclass))) 
-   
+             #type = NA) %>% 
+      #mutate(across(college, as.character))  
+      dplyr::slice(-which(is.na(female))) 
    taste.mat <- as.matrix(dplyr::filter(taste.dat, id %in% dat.demog$id)[2:21])
    rownames(taste.mat) <- dat.demog$id
    dat.demog <- dat.demog[-1]
    # genre data
    genre.dat <- data.frame(matrix(nrow = 20, ncol = 0))
    rownames(genre.dat) <- names(taste.dat[,2:21])
-   genre.dat$age <- NA
-   genre.dat$college <- NA
-   genre.dat$objclass <- NA
-   genre.dat$subclass <- NA
-   genre.dat$gender <- NA
-   genre.dat$race <- NA
-   genre.dat$region.f <- NA
-   genre.dat$age.n <- NA
-   #genre.dat$educ.n <- NA
-   genre.dat$type <- c(rep("high", 6), rep("folk", 5), rep("blkpop", 4), rep("pop", 5))
-   genre.dat
+   genre.dat$college <- test.mat["College", ]
+   genre.dat$blk <- test.mat["Black", ]
+   genre.dat$his <- test.mat["Hisp.", ]
+   genre.dat$asn <- test.mat["Asian", ]
+   genre.dat$wht <- test.mat["White", ]
+   genre.dat$mrc <- NA
+   genre.dat$female <- test.mat["Women", ]
+   genre.dat$yng <- test.mat["Young", ]
+   genre.dat$mid <- test.mat["Mid. Aged", ]
+   genre.dat$old <- test.mat["Old", ]
    dat.demog <- rbind(dat.demog, genre.dat)
    attribute_list <- do.call(list, dat.demog)
    # network object
    taste.net <- network(taste.mat, bipartite = TRUE, vertex.attr = attribute_list)
 ```
-   
-
-```{r}
-      m <- ergm(taste.net ~
-              edges +
-              b2star(2) 
-              #b1cov("age.n") +
-              #b1factor("race", levels = -6) +
-              #b1nodematch("race", beta = .5, diff = F) +
-              #b1nodematch("age", beta = .5, diff = F) +
-              #b1nodematch("gender", beta = .5) 
-
-
-         #b1cov("age.n") +
-         #b1factor("race", levels = -2) +
-         #b1factor("educ.f", levels = c(1, 4, 2, 3, 5)) +
-         #b1nodematch("race", beta = 0.5) +
-         #b1nodematch("educ.f", beta = 0.5) 
-         #b1nodematch("educ.f", diff = TRUE,  
-                    #levels = c(1, 4, 2, 6, 3, 5), beta = 0.5) 
-         #b1nodematch("age", beta = 0.5)
-         #b1factor("objclass", levels = c(5, 1, 4, 3)) +
-         #b1nodematch("race", diff = TRUE, beta = 0.5, levels = -5) +
-         #b1nodematch("educ.f", diff = TRUE,  
-                    #levels = c(1, 4, 2, 6, 3, 5), beta = 0.5) +
-         #b1nodematch("age", diff = TRUE, beta = 0.5) +
-         #b1nodematch("objclass", diff = TRUE,
-                     #levels = c(2, 5, 1, 4, 3), beta = 0.5) 
-         , estimate = "MLE"
-           )
-      summary(m)
-```
 
 
 ```{r}
-   m1 <- ergm(taste.net ~ edges, estimate = "MPLE")
-   m2 <- ergm(taste.net ~ edges + b2sociality(nodes = -7), estimate = "MPLE")
-   m3 <- ergm(taste.net ~ edges + 
-                 b2sociality(nodes = -7) +
-                 b1factor("educ.f", levels = c(4, 2, 6, 3, 5)) +
-                 b1cov("age") +
-                 b1factor("gender") +
-                 b1factor("race", levels = -6), 
-              estimate = "MPLE")
-   m4 <- ergm(taste.net ~ edges + 
-                    b2sociality(nodes = -7) +
-                    b1factor("educ.f", levels = c(4, 2, 6, 3, 5)) +
-                    b1cov("age") +
-                    b1factor("gender") +
-                    #b1factor("race", levels = -6) +
-                    b1twostar("race", b1levels = 2), 
-                 estimate = "MPLE")
-   summary(m4)
+      #baseline models
+      m1 <- ergm(taste.net ~ edges + 
+                    b1star(2) + b2sociality(c(7, 16)), 
+              estimate ="MPLE")
+      #genre main effects
+      m2 <- ergm(taste.net ~ edges +
+                    b1star(2) + b2sociality(c(7, 16)) +
+                    b2factor("female") + b2factor("yng") + 
+                    b2factor("mid") + b2factor("old") + 
+                    b2factor("college") + b2factor("blk"), 
+              estimate ="MPLE")
+      # genre + person man effects
+      m3 <- ergm(taste.net ~ edges +
+                    b1star(2) + b2sociality(c(7, 16)) +
+                    b2factor("female") + b2factor("yng") +
+                    b2factor("mid") + b2factor("old") + 
+                    b2factor("college") + b2factor("blk") +
+                    b1factor("female") + b1factor("yng") + 
+                    b1factor("old") + b1factor("college") +
+                    b1factor("blk") + b1factor("his") + 
+                    b1factor("asn") + b1factor("mrc"),
+              estimate ="MPLE")    
+      # gender stars model
+      m4 <- ergm(taste.net ~ edges +
+                    b1star(2) + b2sociality(c(7, 16)) +
+                    b2factor("female") + b2factor("yng") +
+                    b2factor("mid") + b2factor("old") + 
+                    b2factor("college") + b2factor("blk") +
+                    b1factor("female") + b1factor("yng") + 
+                    b1factor("old") + b1factor("college") +
+                    b1factor("blk") + b1factor("his") + 
+                    b1factor("asn") + b1factor("mrc") +
+                    b1twostar("female", "female", levels2 = c(1, 6)), 
+              estimate ="MPLE") 
+      # age stars model
+      m5 <- ergm(taste.net ~ edges +
+                    b1star(2) + b2sociality(c(7, 16)) +
+                    b2factor("female") + b2factor("yng") +
+                    b2factor("mid") + b2factor("old") + 
+                    b2factor("college") + b2factor("blk") +
+                    b1factor("female") + b1factor("yng") + 
+                    b1factor("old") + b1factor("college") +
+                    b1factor("blk") + b1factor("his") + 
+                    b1factor("asn") + b1factor("mrc") +
+                    b1twostar("yng", "yng", levels2 = c(6)) + 
+                    b1twostar("mid", "mid", levels2 = c(6)) + 
+                    b1twostar("old", "old", levels2 = c(6)),
+              estimate ="MPLE") 
+      # race stars model
+      m6 <- ergm(taste.net ~ edges +
+                    b1star(2) + b2sociality(c(7, 16)) +
+                    b2factor("female") + b2factor("yng") +
+                    b2factor("mid") + b2factor("old") + 
+                    b2factor("college") + b2factor("blk") +
+                    b1factor("female") + b1factor("yng") + 
+                    b1factor("old") + b1factor("college") +
+                    b1factor("blk") + b1factor("his") + 
+                    b1factor("asn") + b1factor("mrc") +
+                    b1twostar("blk", "blk", levels2 = c(6)) + 
+                    b1twostar("his", "his", levels2 = c(6)) + 
+                    b1twostar("asn", "asn", levels2 = c(6)) + 
+                    b1twostar("wht", "wht", levels2 = c(6)),
+              estimate ="MPLE") 
 ```
 
+```{r}
+      texreg(list(m1, m2, m3), 
+             file = here("Tabs","ergm-tab1.tex"),
+             custom.coef.names =  c("Edges","Person 2-Star", 
+                                   "Classic Rock","Pop",
+                                   "Genre: Women","Genre: Young",
+                                   "Genre: Mid", "Genre: Old",
+                                   "Genre: College", "Genre: Black", 
+                                   "Person: Woman", "Person: Young",
+                                   "Person: Old",  "Person: College",
+                                   "Person: Black", "Person: Hisp.",
+                                   "Person: Asian", "Person: Mult."),
+             booktabs = TRUE, use.packages = FALSE, digits = 4,
+             )
+
+      texreg(list(m4, m5, m6),
+             file = here("Tabs","ergm-tab2.tex"),
+             custom.coef.names =  c("Edges","Person 2-Star", 
+                                   "Classic Rock","Pop",
+                                   "Genre: Women","Genre: Young",
+                                   "Genre: Mid", "Genre: Old",
+                                   "Genre: College", "Genre: Black", 
+                                   "Person: Woman", "Person: Young",
+                                   "Person: Old",  "Person: College",
+                                   "Person: Black", "Person: Hisp.",
+                                   "Person: Asian", "Person: Mult.",
+                                   "G(Men)-P(Man)-G(Men)",
+                                   "G(Women)-P(Woman)-G(Women)",
+                                   "G(Young)-P(Young)-G(Young)",
+                                   "G(Mid.)-P(Mid.)-G(Mid.)",
+                                   "G(Old)-P(Old)-G(Old)",
+                                   "G(Black)-P(Black)-G(Black)",
+                                   "G(Hisp)-P(Hisp)-G(Hisp)",
+                                   "G(Asian)-P(Asian)-G(Asian)",
+                                   "G(White)-P(White)-G(White)"),
+             booktabs = TRUE, longtable = TRUE, 
+             use.packages = FALSE, digits = 4,
+             omit.coef = "(edges)|(b1star2)|(b2sociality)|(b2factor)"
+             )
+```
