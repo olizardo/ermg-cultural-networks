@@ -134,8 +134,9 @@
    source(here("Functions","demog.dat.R"))
    dat.demog <- demog.dat() %>% 
       dplyr::filter(id %in% unlist(taste.dat$id))  %>% 
-      dplyr::select(c("id","college","blk","his","wht","asn","mrc", "female","yng","mid", "old")) %>%
+      dplyr::select(c("id","college","blk","his","wht","asn","mrc", "female","yng","mid", "old", "low", "wrk", "mcl", "upr")) %>%
       mutate(female = as.numeric(female)) %>% 
+      mutate(male = if_else(female == 0, 1, 0)) %>% 
       #mutate(age.n = as.numeric(age), 
              #educ.n = as.numeric(educ.f),
              #type = NA) %>% 
@@ -154,9 +155,14 @@
    genre.dat$wht <- test.mat["White", ]
    genre.dat$mrc <- NA
    genre.dat$female <- test.mat["Women", ]
+   genre.dat$male <- test.mat["Men", ]
    genre.dat$yng <- test.mat["Young", ]
    genre.dat$mid <- test.mat["Mid. Aged", ]
    genre.dat$old <- test.mat["Old", ]
+   genre.dat$low <- test.mat["Lower Cls.", ]
+   genre.dat$wrk <- test.mat["Working Cls.", ]
+   genre.dat$mcl <- test.mat["Middle Cls.", ]
+   genre.dat$upr <- test.mat["Upper Cls.", ]
    dat.demog <- rbind(dat.demog, genre.dat)
    attribute_list <- do.call(list, dat.demog)
    # network object
@@ -184,6 +190,7 @@
                     b2factor("college") + b2factor("blk") +
                     b1factor("female") + b1factor("yng") + 
                     b1factor("old") + b1factor("college") +
+                    b1factor("low") + b1factor("wrk") + b1factor("upr") +
                     b1factor("blk") + b1factor("his") + 
                     b1factor("asn") + b1factor("mrc"),
               estimate ="MPLE")    
@@ -195,9 +202,11 @@
                     b2factor("college") + b2factor("blk") +
                     b1factor("female") + b1factor("yng") + 
                     b1factor("old") + b1factor("college") +
+                    b1factor("low") + b1factor("wrk") + b1factor("upr") +
                     b1factor("blk") + b1factor("his") + 
                     b1factor("asn") + b1factor("mrc") +
-                    b1twostar("female", "female", levels2 = c(1, 6)), 
+                    b1twostar("female", "female", levels2 = c(6)) + 
+                    b1twostar("male", "male", levels2 = c(6)), 
               estimate ="MPLE") 
       # age stars model
       m5 <- ergm(taste.net ~ edges +
@@ -207,6 +216,7 @@
                     b2factor("college") + b2factor("blk") +
                     b1factor("female") + b1factor("yng") + 
                     b1factor("old") + b1factor("college") +
+                    b1factor("low") + b1factor("wrk") + b1factor("upr") +
                     b1factor("blk") + b1factor("his") + 
                     b1factor("asn") + b1factor("mrc") +
                     b1twostar("yng", "yng", levels2 = c(6)) + 
@@ -221,13 +231,64 @@
                     b2factor("college") + b2factor("blk") +
                     b1factor("female") + b1factor("yng") + 
                     b1factor("old") + b1factor("college") +
+                    b1factor("low") + b1factor("wrk") + b1factor("upr") +
                     b1factor("blk") + b1factor("his") + 
                     b1factor("asn") + b1factor("mrc") +
                     b1twostar("blk", "blk", levels2 = c(6)) + 
                     b1twostar("his", "his", levels2 = c(6)) + 
                     b1twostar("asn", "asn", levels2 = c(6)) + 
                     b1twostar("wht", "wht", levels2 = c(6)),
-              estimate ="MPLE") 
+              estimate ="MPLE")
+      # educ stars model
+      m7 <- ergm(taste.net ~ edges +
+                    b1star(2) + b2sociality(c(7, 16)) +
+                    b2factor("female") + b2factor("yng") +
+                    b2factor("mid") + b2factor("old") + 
+                    b2factor("college") + b2factor("blk") +
+                    b1factor("female") + b1factor("yng") + 
+                    b1factor("old") + b1factor("college") +
+                    b1factor("low") + b1factor("wrk") + b1factor("upr") +
+                    b1factor("blk") + b1factor("his") + 
+                    b1factor("asn") + b1factor("mrc") +
+                    b1twostar("college", "college", levels2 = c(6)),
+              estimate ="MPLE")
+      # class stars model
+      m8 <- ergm(taste.net ~ edges +
+                    b1star(2) + b2sociality(c(7, 16)) +
+                    b2factor("female") + b2factor("yng") +
+                    b2factor("mid") + b2factor("old") + 
+                    b2factor("college") + b2factor("blk") +
+                    b1factor("female") + b1factor("yng") + 
+                    b1factor("old") + b1factor("college") +
+                    b1factor("low") + b1factor("wrk") + b1factor("upr") +
+                    b1factor("blk") + b1factor("his") + 
+                    b1factor("asn") + b1factor("mrc") +
+                    b1twostar("college", "college", levels2 = c(6)) +
+                    b1twostar("low", "low", levels2 = c(6)) +
+                    b1twostar("wrk", "wrk", levels2 = c(6)) +
+                    b1twostar("mcl", "mcl", levels2 = c(6)) +
+                    b1twostar("upr", "upr", levels2 = c(6)),
+              estimate ="MPLE")
+      m9 <- ergm(taste.net ~ edges +
+                    b1star(2) + b2sociality(c(7, 16)) +
+                    b2factor("female") + b2factor("yng") +
+                    b2factor("mid") + b2factor("old") + 
+                    b2factor("college") + b2factor("blk") +
+                    b1factor("female") + b1factor("yng") + 
+                    b1factor("old") + b1factor("college") +
+                    b1factor("low") + b1factor("wrk") + b1factor("upr") +
+                    b1factor("blk") + b1factor("his") + 
+                    b1factor("asn") + b1factor("mrc") +
+                    b1twostar("college", "college", levels2 = c(6)) +
+                    b1twostar("low", "low", levels2 = c(6)) +
+                    b1twostar("wrk", "wrk", levels2 = c(6)) +
+                    b1twostar("mcl", "mcl", levels2 = c(6)) +
+                    b1twostar("upr", "upr", levels2 = c(6)) +
+                    b1twostar("college", "low", levels2 = c(6)) +
+                    b1twostar("college", "wrk", levels2 = c(6)) +
+                    b1twostar("college", "mcl", levels2 = c(6)) +
+                    b1twostar("college", "upr", levels2 = c(6)),
+              estimate ="MPLE")
 ```
 
 ```{r}
@@ -240,9 +301,13 @@
                                    "Genre: College", "Genre: Black", 
                                    "Person: Woman", "Person: Young",
                                    "Person: Old",  "Person: College",
+                                   "Person: Lower Cls.",  "Person: Working Cls.",
+                                   "Person: Upper Cls.",
                                    "Person: Black", "Person: Hisp.",
                                    "Person: Asian", "Person: Mult."),
              booktabs = TRUE, use.packages = FALSE, digits = 4,
+             caption = "Coefficient estimates of two-mode ERGMs models obtained via pseudo-likelihood.",
+             label = "tab:reg1"
              )
 
       texreg(list(m4, m5, m6),
@@ -254,19 +319,51 @@
                                    "Genre: College", "Genre: Black", 
                                    "Person: Woman", "Person: Young",
                                    "Person: Old",  "Person: College",
+                                   "Person: Lower Cls.",  "Person: Working Cls.",
+                                   "Person: Upper Cls.",
                                    "Person: Black", "Person: Hisp.",
                                    "Person: Asian", "Person: Mult.",
-                                   "G(Men)-P(Man)-G(Men)",
                                    "G(Women)-P(Woman)-G(Women)",
+                                   "G(Men)-P(Man)-G(Men)",
                                    "G(Young)-P(Young)-G(Young)",
                                    "G(Mid.)-P(Mid.)-G(Mid.)",
                                    "G(Old)-P(Old)-G(Old)",
                                    "G(Black)-P(Black)-G(Black)",
-                                   "G(Hisp)-P(Hisp)-G(Hisp)",
+                                   "G(Hisp.)-P(Hisp.)-G(Hisp.)",
                                    "G(Asian)-P(Asian)-G(Asian)",
                                    "G(White)-P(White)-G(White)"),
              booktabs = TRUE, longtable = TRUE, 
              use.packages = FALSE, digits = 4,
+             caption = "Coefficient estimates of two-mode ERGMs models obtained via pseudo-likelihood.",
+             label = "tab:reg2",
+             omit.coef = "(edges)|(b1star2)|(b2sociality)|(b2factor)"
+             )
+      texreg(list(m7, m8, m9),
+             file = here("Tabs","ergm-tab3.tex"),
+             custom.coef.names =  c("Edges","Person 2-Star", 
+                                   "Classic Rock","Pop",
+                                   "Genre: Women","Genre: Young",
+                                   "Genre: Mid", "Genre: Old",
+                                   "Genre: College", "Genre: Black", 
+                                   "Person: Woman", "Person: Young",
+                                   "Person: Old",  "Person: College",
+                                   "Person: Lower Cls.",  "Person: Working Cls.",
+                                   "Person: Upper Cls.",
+                                   "Person: Black", "Person: Hisp.",
+                                   "Person: Asian", "Person: Mult.",
+                                   "G(College)-P(College)-G(College)",
+                                   "G(Lower)-P(Lower)-G(Lower)",
+                                   "G(Working)-P(Working)-G(Working)",
+                                   "G(Middle)-P(Middle)-G(Middle)",
+                                   "G(Upper)-P(Upper)-G(Upper)",
+                                   "G(Lower)-P(College)-G(Lower)",
+                                   "G(Working)-P(College)-G(Working)",
+                                   "G(Middle)-P(College)-G(Middle)",
+                                   "G(Upper)-P(College)-G(Upper)"),
+             booktabs = TRUE, longtable = TRUE, 
+             use.packages = FALSE, digits = 4,
+             caption = "Coefficient estimates of two-mode ERGMs models obtained via pseudo-likelihood.",
+             label = "tab:reg3",
              omit.coef = "(edges)|(b1star2)|(b2sociality)|(b2factor)"
              )
 ```
