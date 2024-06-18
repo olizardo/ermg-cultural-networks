@@ -1,10 +1,21 @@
 
-\begin{table}
 \begin{center}
-\begin{tabular}{l c c c}
+\begin{longtable}{l c c c}
 \toprule
  & Model 1 & Model 2 & Model 3 \\
 \midrule
+\endfirsthead
+\toprule
+ & Model 1 & Model 2 & Model 3 \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\bottomrule
+\multicolumn{4}{l}{\scriptsize{$^{***}p<0.001$; $^{**}p<0.01$; $^{*}p<0.05$}}\\
+\caption{Coefficient estimates of two-mode ERGMs models obtained via pseudo-likelihood.}
+\label{tab:reg1}
+\endlastfoot \\
 Edges                & $-2.1483^{***}$ & $-3.6001^{***}$ & $-3.5879^{***}$ \\
                      & $(0.0253)$      & $(0.0723)$      & $(0.0777)$      \\
 Person 2-Star        & $0.1614^{***}$  & $0.1709^{***}$  & $0.1670^{***}$  \\
@@ -51,10 +62,5 @@ Person: Mult.        &                 &                 & $0.1986^{**}$   \\
 AIC                  & $41391.0182$    & $40182.4700$    & $40180.8289$    \\
 BIC                  & $41425.5885$    & $40268.8956$    & $40362.3228$    \\
 Log Likelihood       & $-20691.5091$   & $-20081.2350$   & $-20069.4145$   \\
-\bottomrule
-\multicolumn{4}{l}{\scriptsize{$^{***}p<0.001$; $^{**}p<0.01$; $^{*}p<0.05$}}
-\end{tabular}
-\caption{Coefficient estimates of two-mode ERGMs models obtained via pseudo-likelihood.}
-\label{tab:reg1}
+\end{longtable}
 \end{center}
-\end{table}
